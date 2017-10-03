@@ -66,6 +66,7 @@ llvm_config.feature_config(
                           'AVR': 'avr',
                           'Mips': 'mips',
                           'PowerPC': 'ppc',
+                          'RISCV': 'riscv',
                           'Sparc': 'sparc',
                           'X86': 'x86'})
      ])

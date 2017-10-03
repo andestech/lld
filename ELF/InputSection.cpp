@@ -573,6 +573,26 @@ static uint64_t getRelocTargetVA(RelType Type, int64_t A, uint64_t P,
       Dest = getAArch64Page(Sym.getVA(A));
     return Dest - getAArch64Page(P);
   }
+  case R_RISCV_PC_INDIRECT: {
+    // For R_RISCV_PC_INDIRECT (R_RISCV_PCREL_LO12_{I,S}), the symbol actually
+    // points the corresponding R_RISCV_PCREL_HI20 relocation, and the target VA
+    // is calculated using HI20's symbol.
+    uint64_t Label = Sym.getVA();
+    const InputSection *IS =
+        cast<InputSection>(cast<Defined>(Sym).Section);
+    for (const Relocation &HiRel : IS->Relocations) {
+      uint64_t HiOffset = IS->getOffset(HiRel.Offset);
+      uint64_t HiAddrLoc = IS->getOutputSection()->Addr + HiOffset;
+      if (Label == HiAddrLoc && isRelExprOneOf<R_PC>(HiRel.Expr)) {
+        return getRelocTargetVA(HiRel.Type, HiRel.Addend, HiAddrLoc, *HiRel.Sym,
+                                HiRel.Expr);
+      }
+    }
+
+    error("PCREL_LO12 relocation to symbol " + Sym.getName() +
+          " without associated HI20 relocation");
+    return 0;
+  }
   case R_PC: {
     uint64_t Dest;
     if (Sym.isUndefWeak()) {

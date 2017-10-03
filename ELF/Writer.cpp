@@ -788,6 +788,10 @@ template <class ELFT> void Writer<ELFT>::addReservedSymbols() {
           Symtab->addAbsolute<ELFT>("__gnu_local_gp", STV_HIDDEN, STB_LOCAL);
   }
 
+  if (Config->EMachine == EM_RISCV)
+    ElfSym::RISCVGlobalPointer = addOptionalRegular<ELFT>(
+        "__global_pointer$", Out::ElfHeader, 0, STV_HIDDEN);
+
   // The _GLOBAL_OFFSET_TABLE_ symbol is defined by target convention to
   // be at some offset from the base of the .got section, usually 0 or the end
   // of the .got
@@ -902,6 +906,16 @@ template <class ELFT> void Writer<ELFT>::setReservedSymbolSections() {
         break;
       }
     }
+  }
+
+  // RISC-V's gp can address +/- 2 KiB, so it is set to .sdata or .data + 0x800.
+  if (ElfSym::RISCVGlobalPointer) {
+    if (const auto Sdata = findSection(".sdata"))
+      ElfSym::RISCVGlobalPointer->Section = Sdata;
+    else if (const auto Data = findSection(".data"))
+      ElfSym::RISCVGlobalPointer->Section = Data;
+
+    ElfSym::RISCVGlobalPointer->Value = 0x800;
   }
 }
 
