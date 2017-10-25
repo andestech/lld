@@ -1,20 +1,42 @@
+# riscv-lld
 
-LLVM Linker (lld)
-==============================
+This repository contains the RISC-V port of lld (the LLVM linker).
 
-This directory and its subdirectories contain source code for the LLVM Linker, a
-modular cross platform linker which is built as part of the LLVM compiler
-infrastructure project.
+## Status
 
-lld is open source software. You may freely distribute it under the terms of
-the license agreement found in LICENSE.txt.
+* Link static ELF executables
+* Link dynamic ELF (PIE) executables and shared libraries
+* Support for thread-local storage (TLS)
+* Unit tests
 
-Benchmarking
-============
+Patches are submitted for review on LLVM phabricator.
 
-In order to make sure various developers can evaluate patches over the
-same tests, we create a collection of self contained programs.
+**This repository will be regularly rebased onto lld master.**
 
-It is hosted at https://s3-us-west-2.amazonaws.com/linker-tests/lld-speed-test.tar.xz
+## How to build
 
-The current sha256 is 4818e8d38961503a04a73597b0da1242c39efc9df2ceb6dfca4ed36845239863.
+```
+$ git clone https://github.com/llvm-mirror/llvm && cd llvm
+$ git checkout f14ad9a908afbe3ed23911d23359d8380bcce29d
+$ git clone https://github.com/andestech/lld tools/lld
+$ mkdir build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release \
+        -DLLVM_ENABLE_PROJECTS=lld \
+        -DTARGETS_TO_BUILD= \
+        -DEXPERIMENTAL_TARGETS_TO_BUILD=RISCV \
+        ..
+$ make lld
+```
+
+## Usage
+
+You may invoke `ld.lld` directly or replace `ld` in the toolchain path with `ld.lld`:
+
+```
+$ cp bin/ld.lld ${path_to_toolchain}/bin/ld.lld
+$ ln -sf ${path_to_toolchain}/bin/{ld.lld,ld}
+```
+
+## Issues
+
+Please report issues related to the RISC-V port on GitHub's issue tracker.
