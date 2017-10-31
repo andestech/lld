@@ -353,7 +353,7 @@ static bool needsGot(RelExpr Expr) {
 // file (PC, or GOT for example).
 static bool isRelExpr(RelExpr Expr) {
   return isRelExprOneOf<R_PC, R_GOTREL, R_GOTREL_FROM_END, R_MIPS_GOTREL,
-                        R_PAGE_PC, R_RELAX_GOT_PC>(Expr);
+                        R_PAGE_PC, R_RELAX_GOT_PC, R_RISCV_PC_INDIRECT>(Expr);
 }
 
 // Returns true if a given relocation can be computed at link-time.
